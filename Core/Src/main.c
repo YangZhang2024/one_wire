@@ -18,14 +18,16 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "delay.h"
 #include "lcd.h"
-#include "ds18b20.h"
+//#include "ds18b20.h"
 #include "stdio.h"
+#include "dht11.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -88,27 +90,28 @@ int main(void) {
 
     /* Initialize all configured peripherals */
     MX_GPIO_Init();
+    MX_USART1_UART_Init();
     /* USER CODE BEGIN 2 */
     delay_init(72);
     lcd_init();
-    uint8_t not_exist = ds18b20_init();
+//    uint8_t not_exist = ds18b20_init();
     /* USER CODE END 2 */
-    if (not_exist) {
-        lcd_show_string(10, 50, 240, 24, 24, "DS18B20 Not Exist", RED);
-    }
 
-    uint8_t temp_str[12];
-
-//    lcd_show_string(10, 80, 240, 24, 24, "TFT LCD TEST", RED);
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
+
+    double temp = 0, humidity = 0;
+    uint8_t temp_str[20], humidity_str[20];
     while (1) {
+        HAL_Delay(2100);
+        get_humidity(&temp, &humidity);
+        sprintf((char *) temp_str, "Temp: %.2f", temp);
+        sprintf((char *) humidity_str, "Humi: %.2f", humidity);
+        lcd_show_string(10, 50, 240, 24, 24, (char *) temp_str, RED);
+        lcd_show_string(10, 80, 240, 24, 24, (char *) humidity_str, RED);
+
         /* USER CODE END WHILE */
 
-        short temp = ds18b20_get_temperature();
-        sprintf((char *) temp_str, "Temp: %d.%d", temp / 10, temp % 10);
-        lcd_show_string(10, 80, 240, 24, 24, (char *) temp_str, RED);
-        HAL_Delay(500);
         /* USER CODE BEGIN 3 */
     }
     /* USER CODE END 3 */
